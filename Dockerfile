@@ -2,7 +2,6 @@ FROM node:6.9.4-slim
 MAINTAINER Luzifix
 
 WORKDIR /tmp
-COPY webdriver-versions.js ./
 ENV CHROME_PACKAGE="google-chrome-stable_63.0.3239.84-1_amd64.deb" NODE_PATH=/usr/local/lib/node_modules:/protractor/node_modules
 
 RUN npm install -g protractor@5.1.2 minimist@1.2.0 && \
