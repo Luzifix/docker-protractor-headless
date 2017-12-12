@@ -1,10 +1,12 @@
 FROM node:6.9.4-slim
-MAINTAINER j.ciolek@webnicer.com
+MAINTAINER Luzifix
+
 WORKDIR /tmp
 COPY webdriver-versions.js ./
-ENV CHROME_PACKAGE="google-chrome-stable_59.0.3071.115-1_amd64.deb" NODE_PATH=/usr/local/lib/node_modules:/protractor/node_modules
-RUN npm install -g protractor@4.0.14 minimist@1.2.0 && \
-    node ./webdriver-versions.js --chromedriver 2.32 && \
+ENV CHROME_PACKAGE="google-chrome-stable_63.0.3239.84-1_amd64.deb" NODE_PATH=/usr/local/lib/node_modules:/protractor/node_modules
+
+RUN npm install -g protractor@5.1.2 minimist@1.2.0 && \
+    node ./webdriver-versions.js --chromedriver 2.33 && \
     webdriver-manager update && \
     echo "deb http://ftp.debian.org/debian jessie-backports main" >> /etc/apt/sources.list && \
     apt-get update && \
@@ -15,12 +17,17 @@ RUN npm install -g protractor@4.0.14 minimist@1.2.0 && \
     apt-get install -f -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* \
-    rm ${CHROME_PACKAGE} && \
-    mkdir /protractor
-COPY protractor.sh /
-COPY environment /etc/sudoers.d/
+    rm ${CHROME_PACKAGE}
+    
 # Fix for the issue with Selenium, as described here:
 # https://github.com/SeleniumHQ/docker-selenium/issues/87
 ENV DBUS_SESSION_BUS_ADDRESS=/dev/null SCREEN_RES=1280x1024x24
-WORKDIR /protractor
-ENTRYPOINT ["/protractor.sh"]
+# Set the working directory
+WORKDIR /protractor/
+# Set the HOME environment variable for the test project
+ENV HOME=/protractor/project
+# Set the file access permissions (read, write and access) recursively for the new folders
+RUN chmod -Rf 777 .
+RUN ln -s -f /bin/bash /bin/sh
+# Container entry point
+ENTRYPOINT ["/bin/bash", "-c"]
